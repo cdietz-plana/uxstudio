@@ -156,8 +156,6 @@
   .stat-grid .num{font-family:"Bebas Neue",sans-serif;font-weight:400;font-size:clamp(56px,9vw,130px);line-height:1;letter-spacing:.01em}
   .stat-grid .num .u{color:var(--orange)}
   .stat-grid .lbl{margin-top:14px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--paper-dim);line-height:1.4}
-  .stat-grid .sbar{height:3px;background:var(--line);margin-top:16px;position:relative;overflow:hidden;border-radius:2px}
-  .stat-grid .sbar i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--orange)}
   @media(max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);gap:30px 0}.stat-grid .st{border-left:none;padding-left:0}.stat-grid .st:nth-child(even){padding-left:26px;border-left:1px solid var(--line)}}
 
   /* WORK */
@@ -216,6 +214,18 @@
   .nojs{max-width:820px;margin:0 auto;padding:120px 24px;color:var(--paper);line-height:1.6}
   .nojs h1{font-size:clamp(40px,8vw,90px);margin-bottom:20px}
   .nojs p{margin-bottom:14px;color:var(--paper-dim)}
+  /* password gate */
+  #gate{position:fixed;inset:0;z-index:10001;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;text-align:center;cursor:auto}
+  #gate *{cursor:auto}
+  #gate .gmark{font-family:"Bebas Neue",sans-serif;text-transform:uppercase;font-size:clamp(40px,8vw,86px);line-height:1;color:var(--paper);letter-spacing:.02em}
+  #gate .gmark span{color:var(--orange)}
+  #gate .gate-hint{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper-dim)}
+  #gate .gate-row{display:flex;gap:10px}
+  #gate input{background:transparent;border:1px solid var(--line);color:var(--paper);font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:.14em;text-transform:uppercase;padding:12px 20px;border-radius:100px;outline:none;width:220px;text-align:center;cursor:text}
+  #gate input:focus{border-color:var(--orange)}
+  #gate button{background:var(--orange);color:#0A0F1E;border:none;font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:.08em;text-transform:uppercase;padding:12px 28px;border-radius:100px;cursor:pointer}
+  #gate.err input{border-color:#ff3b30;animation:gshake .4s}
+  @keyframes gshake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 </style>
 <script type="application/ld+json">
 {
@@ -406,6 +416,15 @@
 </head>
 <body>
 
+<div id="gate">
+  <div class="gmark">Plan <span>A</span></div>
+  <div class="gate-hint">Enter password to continue</div>
+  <div class="gate-row">
+    <input id="gateInput" type="password" autocomplete="off" aria-label="Password" placeholder="••••••">
+    <button id="gateBtn" type="button">Enter</button>
+  </div>
+</div>
+
 <noscript>
   <div class="nojs">
     <h1>Plan A UX Studio — Design That Ships</h1>
@@ -542,10 +561,10 @@
 <section class="stats">
   <div class="wrap">
     <div class="stat-grid">
-      <div class="st" data-bar="100"><div class="num" data-to="500"><span>0</span><span class="u">+</span></div><div class="lbl">Products shipped</div><div class="sbar"><i></i></div></div>
-      <div class="st" data-bar="72"><div class="num" data-to="200"><span>0</span><span class="u">+</span></div><div class="lbl">Clients served</div><div class="sbar"><i></i></div></div>
-      <div class="st" data-bar="30"><div class="num" data-to="0.4"><span>0</span><span class="u">%</span></div><div class="lbl">Of applicants hired</div><div class="sbar"><i></i></div></div>
-      <div class="st" data-bar="64"><div class="num" data-to="20"><span>0</span><span class="u">yrs</span></div><div class="lbl">Of shipped software</div><div class="sbar"><i></i></div></div>
+      <div class="st"><div class="num" data-to="500"><span>0</span><span class="u">+</span></div><div class="lbl">Products shipped</div></div>
+      <div class="st"><div class="num" data-to="200"><span>0</span><span class="u">+</span></div><div class="lbl">Clients served</div></div>
+      <div class="st"><div class="num" data-to="0.4"><span>0</span><span class="u">%</span></div><div class="lbl">Of applicants hired</div></div>
+      <div class="st"><div class="num" data-to="20"><span>0</span><span class="u">yrs</span></div><div class="lbl">Of shipped software</div></div>
     </div>
   </div>
 </section>
@@ -703,13 +722,12 @@ let heroPhase='solo';
 })();
 
 /* ===== INTRO — 1) logo assembles  2) cube + upright A alone  3) everything in ===== */
-if(RM){gsap.set('#curtain',{display:'none'});gsap.set('nav',{opacity:1});gsap.set('.hero-tag,.hero-sub',{opacity:1,y:0});gsap.set('.hero h1 .l i',{y:0});heroPhase='full';}
-if(!RM){
 gsap.set('#curtain .curtain-logo path',{opacity:0});
 gsap.set('nav',{opacity:0});
 gsap.set('.hero-tag,.hero-sub',{opacity:0,y:20});
-const introTL=gsap.timeline();
-introTL
+function startReveal(){
+  if(RM){gsap.set('#curtain',{display:'none'});gsap.set('nav',{opacity:1});gsap.set('.hero-tag,.hero-sub',{opacity:1,y:0});gsap.set('.hero h1 .l i',{y:0});heroPhase='full';return;}
+  gsap.timeline()
   /* 1) logo */
   .from('#curtain .curtain-logo',{scale:.9,opacity:0,duration:.55,ease:'power3.out',transformOrigin:'50% 50%'})
   .to('#curtain .curtain-logo path',{opacity:1,duration:.5,stagger:.045,ease:'power2.out'},'-=.25')
@@ -722,6 +740,20 @@ introTL
   .to('.hero h1 .l i',{y:0,duration:1.1,stagger:.12,ease:'power4.out'},'<')
   .to('.hero-tag,.hero-sub',{opacity:1,y:0,duration:1,stagger:.15,ease:'power3.out'},'<.15');
 }
+/* password gate: reveal only after correct entry ("plana") */
+(function(){
+  const gate=document.getElementById('gate'); if(!gate){startReveal();return;}
+  const input=document.getElementById('gateInput');
+  function submit(){
+    if((input.value||'').trim().toLowerCase()==='plana'){
+      gsap.to(gate,{opacity:0,duration:.5,ease:'power2.out',onComplete:()=>{gate.style.display='none';}});
+      startReveal();
+    }else{ gate.classList.add('err'); input.select(); setTimeout(()=>gate.classList.remove('err'),450); }
+  }
+  document.getElementById('gateBtn').addEventListener('click',submit);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
+  input.focus();
+})();
 
 /* ===== CUSTOM CURSOR ===== */
 (function(){
@@ -883,14 +915,12 @@ gsap.from('.logo-wall .lg',{opacity:0,y:20,duration:.6,stagger:.03,ease:"power2.
 gsap.from('.process .plus',{rotation:-180,opacity:0,scale:.4,duration:.7,stagger:.12,ease:'back.out(2)',
   scrollTrigger:{trigger:'.process',start:'top 80%'}});
 
-/* ===== STATS — count up + meter fill ===== */
+/* ===== STATS — count up ===== */
 document.querySelectorAll('.stat-grid .st').forEach(st=>{
   const el=st.querySelector('.num'),to=parseFloat(el.dataset.to),span=el.querySelector('span'),dec=(to%1!==0);
   const o={v:0};
   gsap.to(o,{v:to,duration:1.8,ease:"power2.out",scrollTrigger:{trigger:el,start:"top 85%"},
     onUpdate:()=>{span.textContent=dec?o.v.toFixed(1):Math.floor(o.v);}});
-  gsap.to(st.querySelector('.sbar i'),{width:(st.dataset.bar||'100')+'%',duration:1.8,ease:'power2.out',
-    scrollTrigger:{trigger:el,start:'top 85%'}});
 });
 
 /* ===== SERVICE ghost numbers ===== */
